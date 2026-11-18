@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Kenneth Tomaniog | kennito.xyz</title>
+  <meta name="description" content="Portfolio of Kenneth Tomaniog (Ken): web apps, hackathon builds, and side projects.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B0C0E'/><text x='50' y='72' font-size='64' font-family='monospace' font-weight='800' text-anchor='middle' fill='%2352E08B'>k</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B0C0E;
+      --ink: #E3F2E6;
+      --leaf: #52E08B;
+      --shadow: #1F6B43;
+      --bright: #D8FFB0;
+      --mute: #8CA896;
+      --line: #1A1F1C;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Bricolage Grotesque", system-ui, sans-serif;
+      font-variation-settings: "opsz" 14;
+      font-size: 1.125rem;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main { flex: 1; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; border-radius: 2px; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    .wrap { width: 100%; max-width: 72rem; margin: 0 auto; padding-inline: clamp(1.25rem, 4vw, 3rem); }
+
+    /* Hero: fills the first screen so the next section stays below the fold */
+    .hero {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      padding-block: 2rem;
+    }
+    .hero-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .ascii {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: min(1.6rem, calc((100vw - 2.5rem) / 36));
+      line-height: 1.1;
+      color: var(--leaf);
+      white-space: pre;
+      overflow: hidden;
+      user-select: none;
+    }
+    .ascii .edge { color: var(--shadow); }
+    .intro {
+      max-width: 34rem;
+      margin-top: 2.75rem;
+      font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+      line-height: 1.4;
+    }
+
+    /* Terminal prompt that scrolls to contact */
+    .cue {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6ch;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 1rem;
+      color: var(--mute);
+      text-decoration: none;
+    }
+    .cue .prompt { color: var(--leaf); }
+    .cue:hover { color: var(--ink); }
+    .cue .caret {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.15em;
+      margin-left: 0.1ch;
+      background: var(--leaf);
+      animation: blink 1.1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Contact */
+    .block { padding-block: clamp(3.5rem, 9vw, 6rem); border-top: 1px solid var(--line); }
+    .block h2 {
+      font-weight: normal;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-variation-settings: "opsz" 72, "wght" 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 2.25rem;
+    }
+    .email {
+      display: inline-block;
+      font-size: clamp(1.5rem, 5vw, 3.5rem);
+      font-variation-settings: "opsz" 96, "wght" 600;
+      letter-spacing: -0.02em;
+      color: var(--leaf);
+      text-decoration-thickness: 0.06em;
+      text-underline-offset: 0.15em;
+      overflow-wrap: anywhere;
+    }
+    .socials { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 1.75rem; }
+    .socials a:hover { color: var(--leaf); }
+
+    footer {
+      color: var(--mute);
+      font-size: 0.95rem;
+      text-align: center;
+      padding-block: 2rem 3rem;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .cue .caret { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <section class="wrap hero">
+      <div class="hero-main">
+        <h1 class="sr-only">kennito</h1>
+        <pre class="ascii" aria-hidden="true"></pre>
+        <p class="intro">Hi, I'm Kenneth Tomaniog, but everyone calls me Ken. I build web apps, hackathon projects, and whatever idea won't leave me alone at 2 a.m.</p>
+      </div>
+      <a class="cue" href="#contact"><span class="prompt" aria-hidden="true">$</span>contact<span class="caret" aria-hidden="true"></span></a>
+    </section>
+
+    <section class="wrap block" id="contact">
+      <h2>Let's build something</h2>
+      <a class="email" href="mailto:kenbuildsthings@gmail.com">kenbuildsthings@gmail.com</a>
+      <div class="socials">
+        <a href="https://github.com/kennito2035" rel="me">GitHub</a>
+        <a href="https://www.linkedin.com/in/kenneth-tomaniog-721089369" rel="me">LinkedIn</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>© 2026 Kenneth Tomaniog</p>
+  </footer>
+
+  <script>
+    const ART = [
+      "██╗  ██╗███████╗███╗   ██╗███╗   ██╗██╗████████╗ ██████╗ ",
+      "██║ ██╔╝██╔════╝████╗  ██║████╗  ██║██║╚══██╔══╝██╔═══██╗",
+      "█████╔╝ █████╗  ██╔██╗ ██║██╔██╗ ██║██║   ██║   ██║   ██║",
+      "██╔═██╗ ██╔══╝  ██║╚██╗██║██║╚██╗██║██║   ██║   ██║   ██║",
+      "██║  ██╗███████╗██║ ╚████║██║ ╚████║██║   ██║   ╚██████╔╝",
+      "╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═╝  ╚═══╝╚═╝   ╚═╝    ╚═════╝ "
+    ];
+    const COLS = ART[0].length;
+    const ROWS = ART.length;
+    const EDGE = /[╗╝╔╚═║]/;
+    const NOISE = "░▒▓#%&*+=:.";
+    const noise = () => NOISE[(Math.random() * NOISE.length) | 0];
+
+    const pre = document.querySelector(".ascii");
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const canHover = matchMedia("(hover: hover)").matches;
+
+    // Build one span per visible character.
+    const cells = [];
+    const frag = document.createDocumentFragment();
+    ART.forEach((line, row) => {
+      [...line].forEach((ch, col) => {
+        if (ch === " ") { frag.append(" "); return; }
+        const s = document.createElement("span");
+        s.textContent = ch;
+        if (EDGE.test(ch)) s.className = "edge";
+        cells.push({ el: s, ch, row, col, edge: EDGE.test(ch), at: 0, done: false });
+        frag.append(s);
+      });
+      if (row < ROWS - 1) frag.append("\n");
+    });
+    pre.append(frag);
+
+    // Load-in: characters decode from noise, left to right.
+    if (!reduceMotion) {
+      cells.forEach((c) => {
+        c.el.textContent = noise();
+        c.at = c.col * 18 + Math.random() * 300;
+      });
+      const start = performance.now();
+      const tick = (now) => {
+        const t = now - start;
+        let pending = false;
+        for (const c of cells) {
+          if (c.done) continue;
+          if (t >= c.at) { c.el.textContent = c.ch; c.done = true; }
+          else { pending = true; if (Math.random() < 0.35) c.el.textContent = noise(); }
+        }
+        if (pending) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+
+    // Hover: characters near the cursor glow brighter.
+    if (!reduceMotion && canHover) {
+      let frame = null;
+      window.addEventListener("pointermove", (e) => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          const r = pre.getBoundingClientRect();
+          const cw = r.width / COLS;
+          const lh = r.height / ROWS;
+          const radius = cw * 9;
+          for (const c of cells) {
+            const x = r.left + (c.col + 0.5) * cw;
+            const y = r.top + (c.row + 0.5) * lh;
+            const t = Math.max(0, 1 - Math.hypot(e.clientX - x, e.clientY - y) / radius);
+            c.el.style.color = t > 0
+              ? `color-mix(in srgb, var(--bright) ${Math.round(t * 100)}%, ${c.edge ? "var(--shadow)" : "var(--leaf)"})`
+              : "";
+          }
+          frame = null;
+        });
+      });
+      document.addEventListener("pointerleave", () => {
+        cells.forEach((c) => (c.el.style.color = ""));
+      });
+    }
+  </script>
+</body>
+</html>
