@@ -73,19 +73,21 @@
       justify-content: center;
       min-width: 0;
     }
+
+    /* ASCII art, drawn as shapes so it looks the same on every device */
     .ascii {
       display: block;
-      width: max-content;
-      max-width: 100%;
-      /* Fallback size; the script below scales it to fit exactly. */
-      font-size: min(1.6rem, calc((100vw - 2.5rem) / 42));
-      line-height: 1.1;
-      color: var(--leaf);
-      white-space: pre;
-      overflow: hidden;
+      width: 100%;
+      max-width: 55rem;
+      height: auto;
+      overflow: visible;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
-    .ascii .edge { color: var(--shadow); }
+    .ascii .blk { color: var(--leaf); transition: color 0.2s ease-out; }
+    .ascii .edge { color: var(--shadow); transition: color 0.2s ease-out; }
+
     .whoami { margin-top: 2.75rem; max-width: 60ch; }
     .whoami .output { margin-top: 0.5rem; font-size: clamp(1rem, 1.6vw, 1.2rem); line-height: 1.6; }
 
@@ -128,6 +130,7 @@
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       .caret { animation: none; }
+      .ascii .blk, .ascii .edge { transition: none; }
     }
   </style>
 </head>
@@ -137,7 +140,7 @@
     <section class="wrap hero">
       <div class="hero-main">
         <h1 class="sr-only">kennito</h1>
-        <pre class="ascii" aria-hidden="true"></pre>
+        <svg class="ascii" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="whoami">
           <p class="cmd">whoami</p>
           <p class="output">Hi, I'm Kenneth Tomaniog, but everyone calls me Ken. I build web apps, hackathon projects, and whatever idea won't leave me alone at 2 a.m.</p>
@@ -176,56 +179,57 @@
     ];
     const COLS = ART[0].length;
     const ROWS = ART.length;
-    const EDGE = /[╗╝╔╚═║]/;
-    const NOISE = "░▒▓#%&*+=:.";
-    const noise = () => NOISE[(Math.random() * NOISE.length) | 0];
-    const MAX_SIZE = 25.6; // px, same as 1.6rem
+    const CW = 6, CH = 11;   // one character cell, in SVG units
+    const D = 1.2;           // gap between the two lines of a double line
+    const NS = "http://www.w3.org/2000/svg";
+    const SHADES = [0.12, 0.25, 0.45, 0.7]; // like ░ ▒ ▓ during the decode
 
-    const pre = document.querySelector(".ascii");
+    const svg = document.querySelector(".ascii");
+    svg.setAttribute("viewBox", `0 0 ${COLS * CW} ${ROWS * CH}`);
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const canHover = matchMedia("(hover: hover)").matches;
 
-    // Build one span per visible character.
+    // Double-line shadow characters, drawn as paths inside one cell.
+    function edgePath(ch, x, y) {
+      const cx = x + CW / 2, cy = y + CH / 2, r = x + CW, b = y + CH;
+      switch (ch) {
+        case "═": return `M${x} ${cy - D}H${r}M${x} ${cy + D}H${r}`;
+        case "║": return `M${cx - D} ${y}V${b}M${cx + D} ${y}V${b}`;
+        case "╗": return `M${x} ${cy - D}H${cx + D}V${b}M${x} ${cy + D}H${cx - D}V${b}`;
+        case "╝": return `M${x} ${cy + D}H${cx + D}V${y}M${x} ${cy - D}H${cx - D}V${y}`;
+        case "╔": return `M${r} ${cy - D}H${cx - D}V${b}M${r} ${cy + D}H${cx + D}V${b}`;
+        case "╚": return `M${r} ${cy + D}H${cx - D}V${y}M${r} ${cy - D}H${cx + D}V${y}`;
+      }
+      return "";
+    }
+
+    function make(tag, attrs) {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      return el;
+    }
+
+    // Build one shape per visible character.
     const cells = [];
-    const frag = document.createDocumentFragment();
     ART.forEach((line, row) => {
       [...line].forEach((ch, col) => {
-        if (ch === " ") { frag.append(" "); return; }
-        const s = document.createElement("span");
-        s.textContent = ch;
-        if (EDGE.test(ch)) s.className = "edge";
-        cells.push({ el: s, ch, row, col, edge: EDGE.test(ch), at: 0, done: false });
-        frag.append(s);
+        if (ch === " ") return;
+        const x = col * CW, y = row * CH;
+        const edge = ch !== "█";
+        const el = edge
+          ? make("path", { d: edgePath(ch, x, y), class: "edge", fill: "none", stroke: "currentColor", "stroke-width": 0.7 })
+          : make("rect", { x, y, width: CW + 0.25, height: CH + 0.25, class: "blk", fill: "currentColor" });
+        svg.append(el);
+        cells.push({ el, row, col, edge, x, y, noise: null, at: 0, done: false });
       });
-      if (row < ROWS - 1) frag.append("\n");
-    });
-    pre.append(frag);
-
-    // Scale the art so its real rendered width fits the screen, whatever font the device uses.
-    function fitArt() {
-      const available = pre.parentElement.clientWidth;
-      const saved = cells.map((c) => c.el.textContent);
-      cells.forEach((c) => (c.el.textContent = c.ch)); // measure the real art, not the noise
-      pre.style.maxWidth = "none";
-      pre.style.fontSize = "100px";
-      const natural = pre.scrollWidth;
-      const size = Math.min(MAX_SIZE, (100 * available * 0.98) / natural);
-      pre.style.fontSize = size + "px";
-      pre.style.maxWidth = "";
-      cells.forEach((c, i) => (c.el.textContent = saved[i]));
-    }
-    fitArt();
-    if (document.fonts) document.fonts.ready.then(fitArt);
-    let resizeTimer;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(fitArt, 100);
     });
 
-    // Load-in: characters decode from noise, left to right.
+    // Load-in: each cell flickers as a shaded block, then resolves, left to right.
     if (!reduceMotion) {
       cells.forEach((c) => {
-        c.el.textContent = noise();
+        c.el.style.visibility = "hidden";
+        c.noise = make("rect", { x: c.x, y: c.y, width: CW, height: CH, class: "blk", fill: "currentColor" });
+        c.noise.style.opacity = SHADES[(Math.random() * SHADES.length) | 0];
+        svg.append(c.noise);
         c.at = c.col * 18 + Math.random() * 300;
       });
       const start = performance.now();
@@ -234,38 +238,70 @@
         let pending = false;
         for (const c of cells) {
           if (c.done) continue;
-          if (t >= c.at) { c.el.textContent = c.ch; c.done = true; }
-          else { pending = true; if (Math.random() < 0.35) c.el.textContent = noise(); }
+          if (t >= c.at) {
+            c.noise.remove();
+            c.el.style.visibility = "";
+            c.done = true;
+          } else {
+            pending = true;
+            if (Math.random() < 0.35) c.noise.style.opacity = SHADES[(Math.random() * SHADES.length) | 0];
+          }
         }
         if (pending) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
     }
 
-    // Hover: characters near the cursor glow brighter.
-    if (!reduceMotion && canHover) {
+    // Flashlight: cells near the cursor or finger glow brighter.
+    if (!reduceMotion) {
       let frame = null;
-      window.addEventListener("pointermove", (e) => {
+      let pending = null;
+
+      function glow(px, py, isTouch) {
+        const r = svg.getBoundingClientRect();
+        const cw = r.width / COLS;
+        const lh = r.height / ROWS;
+        // Fingers are bigger than cursors, and the art is smaller on phones.
+        const radius = isTouch ? Math.max(cw * 12, 80) : cw * 9;
+        for (const c of cells) {
+          const x = r.left + (c.col + 0.5) * cw;
+          const y = r.top + (c.row + 0.5) * lh;
+          const t = Math.max(0, 1 - Math.hypot(px - x, py - y) / radius);
+          c.el.style.color = t > 0
+            ? `color-mix(in srgb, var(--bright) ${Math.round(t * 100)}%, ${c.edge ? "var(--shadow)" : "var(--leaf)"})`
+            : "";
+        }
+      }
+
+      function schedule(px, py, isTouch) {
+        pending = [px, py, isTouch];
         if (frame) return;
         frame = requestAnimationFrame(() => {
-          const r = pre.getBoundingClientRect();
-          const cw = r.width / COLS;
-          const lh = r.height / ROWS;
-          const radius = cw * 9;
-          for (const c of cells) {
-            const x = r.left + (c.col + 0.5) * cw;
-            const y = r.top + (c.row + 0.5) * lh;
-            const t = Math.max(0, 1 - Math.hypot(e.clientX - x, e.clientY - y) / radius);
-            c.el.style.color = t > 0
-              ? `color-mix(in srgb, var(--bright) ${Math.round(t * 100)}%, ${c.edge ? "var(--shadow)" : "var(--leaf)"})`
-              : "";
-          }
+          glow(...pending);
           frame = null;
         });
-      });
-      document.addEventListener("pointerleave", () => {
+      }
+
+      function clearGlow() {
+        if (frame) { cancelAnimationFrame(frame); frame = null; }
         cells.forEach((c) => (c.el.style.color = ""));
+      }
+
+      // Mouse
+      window.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "mouse") schedule(e.clientX, e.clientY, false);
       });
+      document.addEventListener("pointerleave", clearGlow);
+
+      // Touch: follows the finger, even while scrolling
+      const onTouch = (e) => {
+        const t = e.touches[0];
+        if (t) schedule(t.clientX, t.clientY, true);
+      };
+      window.addEventListener("touchstart", onTouch, { passive: true });
+      window.addEventListener("touchmove", onTouch, { passive: true });
+      window.addEventListener("touchend", (e) => { if (e.touches.length === 0) clearGlow(); }, { passive: true });
+      window.addEventListener("touchcancel", clearGlow, { passive: true });
     }
   </script>
 </body>
