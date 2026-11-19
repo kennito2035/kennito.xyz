@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B0C0E'/><text x='50' y='72' font-size='64' font-family='monospace' font-weight='800' text-anchor='middle' fill='%2352E08B'>k</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0B0C0E;
@@ -17,7 +17,7 @@
       --leaf: #52E08B;
       --shadow: #1F6B43;
       --bright: #D8FFB0;
-      --mute: #8CA896;
+      --mute: #7F9488;
       --line: #1A1F1C;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,10 +25,9 @@
     body {
       background: var(--bg);
       color: var(--ink);
-      font-family: "Bricolage Grotesque", system-ui, sans-serif;
-      font-variation-settings: "opsz" 14;
-      font-size: 1.125rem;
-      line-height: 1.55;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 1rem;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       display: flex;
@@ -36,13 +35,28 @@
     }
     main { flex: 1; }
     a { color: inherit; }
-    :focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; border-radius: 2px; }
+    :focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; }
     .sr-only {
       position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
       overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
     }
 
     .wrap { width: 100%; max-width: 72rem; margin: 0 auto; padding-inline: clamp(1.25rem, 4vw, 3rem); }
+
+    /* Shared terminal bits */
+    .cmd { color: var(--mute); }
+    .cmd::before { content: "> "; color: var(--leaf); }
+    .comment { color: var(--mute); }
+    .caret {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.15em;
+      margin-left: 0.35ch;
+      vertical-align: text-bottom;
+      background: var(--leaf);
+      animation: blink 1.1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
 
     /* Hero: fills the first screen so the next section stays below the fold */
     .hero {
@@ -57,13 +71,14 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      min-width: 0;
     }
     .ascii {
       display: block;
       width: max-content;
       max-width: 100%;
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: min(1.6rem, calc((100vw - 2.5rem) / 36));
+      /* Fallback size; the script below scales it to fit exactly. */
+      font-size: min(1.6rem, calc((100vw - 2.5rem) / 42));
       line-height: 1.1;
       color: var(--leaf);
       white-space: pre;
@@ -71,70 +86,48 @@
       user-select: none;
     }
     .ascii .edge { color: var(--shadow); }
-    .intro {
-      max-width: 34rem;
-      margin-top: 2.75rem;
-      font-size: clamp(1.25rem, 2.2vw, 1.6rem);
-      line-height: 1.4;
-    }
+    .whoami { margin-top: 2.75rem; max-width: 60ch; }
+    .whoami .output { margin-top: 0.5rem; font-size: clamp(1rem, 1.6vw, 1.2rem); line-height: 1.6; }
 
-    /* Terminal prompt that scrolls to contact */
     .cue {
       align-self: flex-start;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6ch;
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 1rem;
-      color: var(--mute);
       text-decoration: none;
     }
-    .cue .prompt { color: var(--leaf); }
-    .cue:hover { color: var(--ink); }
-    .cue .caret {
-      display: inline-block;
-      width: 0.6em;
-      height: 1.15em;
-      margin-left: 0.1ch;
-      background: var(--leaf);
-      animation: blink 1.1s steps(1) infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
+    .cue:hover .label { color: var(--ink); }
 
     /* Contact */
     .block { padding-block: clamp(3.5rem, 9vw, 6rem); border-top: 1px solid var(--line); }
-    .block h2 {
-      font-weight: normal;
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-variation-settings: "opsz" 72, "wght" 700;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin-bottom: 2.25rem;
+    .block .comment { margin-top: 0.5rem; }
+    .out {
+      display: grid;
+      grid-template-columns: 10ch minmax(0, 1fr);
+      gap: 0.75rem 1rem;
+      margin-top: 1.75rem;
+      font-size: clamp(1rem, 2vw, 1.25rem);
     }
-    .email {
-      display: inline-block;
-      font-size: clamp(1.5rem, 5vw, 3.5rem);
-      font-variation-settings: "opsz" 96, "wght" 600;
-      letter-spacing: -0.02em;
+    .out dt { color: var(--mute); }
+    .out dd a {
       color: var(--leaf);
-      text-decoration-thickness: 0.06em;
-      text-underline-offset: 0.15em;
+      text-decoration: none;
       overflow-wrap: anywhere;
     }
-    .socials { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 1.75rem; }
-    .socials a:hover { color: var(--leaf); }
+    .out dd a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
 
     footer {
       color: var(--mute);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       text-align: center;
       padding-block: 2rem 3rem;
       border-top: 1px solid var(--line);
     }
 
+    @media (max-width: 480px) {
+      .out { grid-template-columns: 1fr; gap: 0.15rem; }
+      .out dd { margin-bottom: 0.75rem; }
+    }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .cue .caret { animation: none; }
+      .caret { animation: none; }
     }
   </style>
 </head>
@@ -145,18 +138,26 @@
       <div class="hero-main">
         <h1 class="sr-only">kennito</h1>
         <pre class="ascii" aria-hidden="true"></pre>
-        <p class="intro">Hi, I'm Kenneth Tomaniog, but everyone calls me Ken. I build web apps, hackathon projects, and whatever idea won't leave me alone at 2 a.m.</p>
+        <div class="whoami">
+          <p class="cmd">whoami</p>
+          <p class="output">Hi, I'm Kenneth Tomaniog, but everyone calls me Ken. I build web apps, hackathon projects, and whatever idea won't leave me alone at 2 a.m.</p>
+        </div>
       </div>
-      <a class="cue" href="#contact"><span class="prompt" aria-hidden="true">$</span>contact<span class="caret" aria-hidden="true"></span></a>
+      <a class="cue" href="#contact"><span class="cmd label">contact</span><span class="caret" aria-hidden="true"></span></a>
     </section>
 
     <section class="wrap block" id="contact">
-      <h2>Let's build something</h2>
-      <a class="email" href="mailto:kenbuildsthings@gmail.com">kenbuildsthings@gmail.com</a>
-      <div class="socials">
-        <a href="https://github.com/kennito2035" rel="me">GitHub</a>
-        <a href="https://www.linkedin.com/in/kenneth-tomaniog-721089369" rel="me">LinkedIn</a>
-      </div>
+      <h2 class="sr-only">Contact</h2>
+      <p class="cmd" aria-hidden="true">contact</p>
+      <p class="comment"># let's build something</p>
+      <dl class="out">
+        <dt>email</dt>
+        <dd><a href="mailto:kenbuildsthings@gmail.com">kenbuildsthings@gmail.com</a></dd>
+        <dt>github</dt>
+        <dd><a href="https://github.com/kennito2035" rel="me">github.com/kennito2035</a></dd>
+        <dt>linkedin</dt>
+        <dd><a href="https://www.linkedin.com/in/kenneth-tomaniog-721089369" rel="me">linkedin.com/in/kenneth-tomaniog</a></dd>
+      </dl>
     </section>
   </main>
 
@@ -178,6 +179,7 @@
     const EDGE = /[╗╝╔╚═║]/;
     const NOISE = "░▒▓#%&*+=:.";
     const noise = () => NOISE[(Math.random() * NOISE.length) | 0];
+    const MAX_SIZE = 25.6; // px, same as 1.6rem
 
     const pre = document.querySelector(".ascii");
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -198,6 +200,27 @@
       if (row < ROWS - 1) frag.append("\n");
     });
     pre.append(frag);
+
+    // Scale the art so its real rendered width fits the screen, whatever font the device uses.
+    function fitArt() {
+      const available = pre.parentElement.clientWidth;
+      const saved = cells.map((c) => c.el.textContent);
+      cells.forEach((c) => (c.el.textContent = c.ch)); // measure the real art, not the noise
+      pre.style.maxWidth = "none";
+      pre.style.fontSize = "100px";
+      const natural = pre.scrollWidth;
+      const size = Math.min(MAX_SIZE, (100 * available * 0.98) / natural);
+      pre.style.fontSize = size + "px";
+      pre.style.maxWidth = "";
+      cells.forEach((c, i) => (c.el.textContent = saved[i]));
+    }
+    fitArt();
+    if (document.fonts) document.fonts.ready.then(fitArt);
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitArt, 100);
+    });
 
     // Load-in: characters decode from noise, left to right.
     if (!reduceMotion) {
